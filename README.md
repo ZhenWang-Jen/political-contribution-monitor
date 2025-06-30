@@ -49,8 +49,11 @@ The application natively supports the official FEC contributions by individuals 
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
-   cd political-contribution-monitor
+   # SSH (requires GitHub SSH key)
+   git clone git@github.com:ZhenWang-Jen/political-contribution-monitor.git
+
+   # or HTTPS
+   git clone https://github.com/ZhenWang-Jen/political-contribution-monitor.git
    ```
 
 2. **Install dependencies**:
@@ -121,17 +124,28 @@ The application is designed to work with official FEC data:
 ```
 political-contribution-monitor/
 ├── backend/
-│   ├── data/           # FEC data files
-│   ├── routes/         # API endpoints
-│   ├── utils/          # Data processing utilities
-│   └── server.js       # Express server
+│   ├── data/                # FEC data files
+│   ├── routes/              # API endpoints
+│   ├── scripts/             # Data processing scripts
+│   ├── utils/               # Data processing utilities
+│   ├── create_indexes.js
+│   ├── createFTS.js
+│   ├── package.json
+│   └── server.js            # Express server
 ├── frontend/
+│   ├── public/              # Static assets
 │   ├── src/
-│   │   ├── components/ # React components
-│   │   ├── pages/      # Page components
-│   │   └── contexts/   # React contexts
-│   └── public/         # Static assets
-└── package.json        # Root package configuration
+│   │   ├── components/      # React components
+│   │   ├── contexts/        # React contexts
+│   │   └── pages/           # Page components
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   └── tsconfig.json
+├── .gitignore
+├── package.json
+├── README.md
+├── WRITEUP.md
 ```
 
 ### Technologies Used
