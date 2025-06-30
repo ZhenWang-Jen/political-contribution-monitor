@@ -1,5 +1,10 @@
 {
   "name": "political-contribution-monitor",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "version": "1.0.0",
   "description": "Political Contribution Monitoring System - Full Stack Application",
   "main": "index.js",
