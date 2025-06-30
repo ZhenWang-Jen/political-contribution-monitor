@@ -1,3 +1,6 @@
+// =============================================================================
+// Imports and Setup
+// =============================================================================
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -12,19 +15,28 @@ import createBulkSearchRouter from './routes/bulkSearch.js';
 import createExportRouter from './routes/export.js';
 import createAnalyticsRouter from './routes/analytics.js';
 
+// =============================================================================
+// App Initialization
+// =============================================================================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const searchResultsCache = new Map();
+const searchResultsCache = new Map(); // In-memory cache for bulk search exports
 
+// =============================================================================
 // Middleware
-app.use(helmet());
-app.use(compression());
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// =============================================================================
+app.use(helmet()); // Basic security headers
+app.use(compression()); // Gzip compression
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// =============================================================================
+// App Logic
+// =============================================================================
 
 // Create data directory if it doesn't exist
 const dataDir = path.join(__dirname, 'data');
@@ -37,11 +49,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Load data and then set up routes
+/**
+ * Main application logic.
+ * This function initializes the data and search index, then sets up the API routes
+ * and starts the Express server. This ensures the server doesn't start accepting
+ * requests until it's fully ready.
+ */
 loadDataAndCreateIndex().then(({ contributions, fuse }) => {
   console.log('Data processed and Fuse index created.');
 
-  // Pass the data to the routers
+  // ===========================================================================
+  // API Routes
+  // ===========================================================================
+  // Pass the loaded data and search index/cache to the respective routers
   app.use('/api/search', createSearchRouter(contributions, fuse));
   app.use('/api/bulk-search', createBulkSearchRouter(contributions, fuse, searchResultsCache));
   app.use('/api/export', createExportRouter(contributions, searchResultsCache));
@@ -49,7 +69,10 @@ loadDataAndCreateIndex().then(({ contributions, fuse }) => {
 
   console.log('Routes configured.');
 
-  // Error handling middleware
+  // ===========================================================================
+  // Error Handling & Static Files
+  // ===========================================================================
+  // Generic error handler
   app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ 
@@ -58,12 +81,12 @@ loadDataAndCreateIndex().then(({ contributions, fuse }) => {
     });
   });
 
-  // 404 handler
+  // Handle 404 - Not Found
   app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
   });
 
-  // Serve static files in production
+  // Serve the frontend's static assets in production
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../frontend/build')));
     app.get('*', (req, res) => {
@@ -71,6 +94,9 @@ loadDataAndCreateIndex().then(({ contributions, fuse }) => {
     });
   }
 
+  // ===========================================================================
+  // Server Start
+  // ===========================================================================
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/api/health`);

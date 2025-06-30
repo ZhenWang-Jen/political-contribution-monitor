@@ -1,3 +1,8 @@
+// =============================================================================
+// /api/search Route
+// =============================================================================
+// Handles individual and filtered searches for contributions.
+
 import express from 'express';
 import moment from 'moment';
 import { normalizeName } from '../utils/dataProcessor.js';

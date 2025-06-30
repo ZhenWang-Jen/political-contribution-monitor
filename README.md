@@ -54,41 +54,29 @@ The application natively supports the official FEC contributions by individuals 
    ```
 
 2. **Install dependencies**:
+   Run the `install-all` script from the root directory. This will install dependencies for the root, backend, and frontend.
    ```bash
-   npm install
+   npm run install-all
    ```
 
 3. **Add your FEC data files**:
-   - Place your FEC data files in the `backend/data/` directory
-   - Supported formats: pipe-delimited (.txt, .dat) or CSV (.csv)
-   - The application will automatically detect and process all data files
+   - Place your FEC data files (pipe-delimited `.txt` format) in the `backend/data/` directory.
+   - The application will automatically detect and process all `.txt` files in this directory on startup.
 
 ## Usage
 
-### Quick Start
+To start both the backend server and the frontend development server concurrently, run the following command from the root directory:
+
 ```bash
-npm start
-```
-This will start both the backend server (port 5000) and frontend development server (port 3000).
-
-### Manual Start
-```bash
-# Start backend only
-npm run backend
-
-# Start frontend only  
-npm run frontend
-
-# Start both (recommended)
 npm run dev
 ```
 
-### Data Processing
+- The backend server will be available at `http://localhost:5000`.
+- The frontend application will be available at `http://localhost:3000`.
+
 The application automatically:
-- Loads all data files from `backend/data/`
-- Processes both CSV and pipe-delimited formats
-- Builds search indexes for fast fuzzy matching
-- Validates data according to FEC specifications
+- Loads all data files from `backend/data/` on startup.
+- Builds an in-memory search index using Fuse.js for fast, fuzzy matching.
 
 ## API Endpoints
 

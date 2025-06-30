@@ -1,3 +1,8 @@
+// =============================================================================
+// /api/export Route
+// =============================================================================
+// Handles exporting search results to a CSV file.
+
 import express from 'express';
 import moment from 'moment';
 

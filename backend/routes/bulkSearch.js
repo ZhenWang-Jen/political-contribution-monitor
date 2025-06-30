@@ -1,3 +1,8 @@
+// =============================================================================
+// /api/bulk-search Route
+// =============================================================================
+// Handles searching for multiple names at once.
+
 import express from 'express';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';

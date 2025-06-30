@@ -17,11 +17,21 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, '../data');
 const TXT_FILES = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.txt'));
 
+/**
+ * Normalizes a name for searching by converting to lowercase, removing special characters,
+ * and collapsing whitespace.
+ * @param {string} name The name to normalize.
+ * @returns {string} The normalized name.
+ */
 export function normalizeName(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9\s]/gi, '').replace(/\s+/g, ' ').trim();
 }
 
-// Parse a single line into a contribution object
+/**
+ * Parses a single line from the FEC data file into a structured contribution object.
+ * @param {string} line A single pipe-delimited line of text.
+ * @returns {object} A contribution object.
+ */
 function parseLine(line) {
   const parts = line.split('|');
   const obj = {};
@@ -35,8 +45,14 @@ function parseLine(line) {
   return obj;
 }
 
-// Async initializer for in-memory data and Fuse.js index
+/**
+ * Initializes the application's data by reading all .txt files from the data directory,
+ * parsing them into contribution objects, and building a Fuse.js search index.
+ * This function is called once on server startup.
+ * @returns {Promise<{contributions: object[], fuse: Fuse}>} An object containing the array of contributions and the Fuse.js index.
+ */
 export async function loadDataAndCreateIndex() {
+  console.log(`Loading data from: ${TXT_FILES.join(', ')}`);
   // Load all contributions from all txt files
   const contributions = [];
   TXT_FILES.forEach(file => {
@@ -49,15 +65,18 @@ export async function loadDataAndCreateIndex() {
       contributions.push(obj);
     });
   });
+  console.log(`Loaded ${contributions.length} total contributions.`);
 
   // Build Fuse.js index for name
+  console.log('Building Fuse.js index...');
   const fuse = new Fuse(contributions, {
-    keys: ['name_normalized'],
-    threshold: 0.3, // adjust for fuzziness
-    includeScore: true,
-    minMatchCharLength: 2,
-    useExtendedSearch: true,
+    keys: ['name_normalized'], // The field to search in
+    threshold: 0.3, // A value of 0.0 requires a perfect match, 1.0 would match anything.
+    includeScore: true, // Include the search score in the results
+    minMatchCharLength: 2, // Minimum number of characters that must be matched
+    useExtendedSearch: true, // Enable powerful AND-style search logic
   });
+  console.log('Fuse.js index built successfully.');
 
   return {
     contributions,

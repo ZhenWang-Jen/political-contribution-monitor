@@ -1,3 +1,8 @@
+// =============================================================================
+// /api/analytics Route
+// =============================================================================
+// Provides aggregated analytics data for the entire dataset.
+
 import express from 'express';
 import moment from 'moment';
 

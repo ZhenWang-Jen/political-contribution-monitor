@@ -1,3 +1,9 @@
+// =============================================================================
+// Analytics Page
+// =============================================================================
+// This component fetches and displays aggregated analytics data for the entire
+// dataset, providing visualizations for trends, geographic distribution, and more.
+
 import React, { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp, AlertTriangle, Users } from 'lucide-react';
 import axios from 'axios';
@@ -7,15 +13,24 @@ import moment from 'moment';
 import { Contribution, Analytics as AnalyticsType } from '../contexts/SearchContext';
 
 const Analytics: React.FC = () => {
+  // ===========================================================================
+  // State Management & Data Fetching
+  // ===========================================================================
   const [data, setData] = useState<AnalyticsType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    /**
+     * Fetches the main analytics data from the backend.
+     * The backend performs all the necessary aggregations.
+     */
     const fetchAnalytics = async () => {
       try {
         const response = await axios.get('/api/analytics');
         const analyticsData = response.data;
-        // The backend sends raw contribution objects, we need to map them
+        // The backend sends raw contribution objects for the 'topContributions' list.
+        // We need to map them to the frontend 'Contribution' model to ensure
+        // properties like 'id' and 'amount' (as a number) are correctly set.
         analyticsData.topContributions = analyticsData.topContributions.map((c: any) => ({
             ...c,
             id: c.sub_id,
@@ -33,6 +48,7 @@ const Analytics: React.FC = () => {
     fetchAnalytics();
   }, []);
 
+  // Show a loading spinner while data is being fetched
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -51,7 +67,7 @@ const Analytics: React.FC = () => {
         </p>
       </div>
 
-      {/* Overview Cards */}
+      {/* Overview Cards: High-level summary statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center">
@@ -104,9 +120,9 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Charts Section */}
+      {/* Charts Section: Visualizations of key metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Monthly Trends */}
+        {/* Monthly Trends Chart */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Contribution Trends</h3>
           <div className="h-64">
@@ -114,7 +130,7 @@ const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* Geographic Distribution */}
+        {/* Geographic Distribution Map */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h3>
           <div className="h-64">
@@ -123,7 +139,7 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Risk Analysis */}
+      {/* Risk Analysis: Breakdown of contributors by risk category */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Analysis</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -145,7 +161,7 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Contributions */}
+      {/* Top Contributions Table: A list of the largest individual donations */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Largest Contributions</h3>
         <div className="overflow-x-auto">

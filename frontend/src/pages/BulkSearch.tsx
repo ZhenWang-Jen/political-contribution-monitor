@@ -1,3 +1,9 @@
+// =============================================================================
+// Bulk Search Page
+// =============================================================================
+// This component allows users to search for contributions for multiple names
+// at once, either by pasting a list or uploading a file (CSV/TXT).
+
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Download, Users, FileText } from 'lucide-react';
@@ -13,15 +19,22 @@ interface PapaParseResult {
 }
 
 const BulkSearch: React.FC = () => {
-  const { state, dispatch } = useSearch();
-  const [names, setNames] = useState<string>('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [fuzzy, setFuzzy] = useState(false);
-  const [city, setCity] = useState('');
-  const [stateFilter, setStateFilter] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
+  // ===========================================================================
+  // State Management
+  // ===========================================================================
+  const { state, dispatch } = useSearch(); // Global context for search state
+  const [names, setNames] = useState<string>(''); // Text area content (names, one per line)
+  const [isProcessing, setIsProcessing] = useState(false); // Loading state for the search process
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // The file uploaded by the user
+  const [fuzzy, setFuzzy] = useState(false); // Toggles fuzzy search
+  const [city, setCity] = useState(''); // Optional city filter
+  const [stateFilter, setStateFilter] = useState(''); // Optional state filter
+  const [hasSearched, setHasSearched] = useState(false); // Tracks if a search has been performed
 
+  /**
+   * `useDropzone` hook for handling file uploads.
+   * Accepts CSV and TXT files, parses them, and populates the names textarea.
+   */
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       'text/csv': ['.csv'],
@@ -35,6 +48,7 @@ const BulkSearch: React.FC = () => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const text = e.target?.result as string;
+          // Use PapaParse for CSVs to correctly handle various delimiters and structures
           if (file.name.endsWith('.csv')) {
             Papa.parse(text, {
               complete: (results: PapaParseResult) => {
@@ -46,6 +60,7 @@ const BulkSearch: React.FC = () => {
               },
             });
           } else {
+            // For TXT files, assume one name per line
             setNames(text);
           }
         };
@@ -54,6 +69,11 @@ const BulkSearch: React.FC = () => {
     },
   });
 
+  /**
+   * Handles the bulk search submission.
+   * Sends a POST request with the list of names and any active filters.
+   * The backend performs the search and returns a unique `searchId` for export purposes.
+   */
   const handleSubmit = async () => {
     if (!names.trim()) return;
 
@@ -104,6 +124,11 @@ const BulkSearch: React.FC = () => {
     }
   };
 
+  /**
+   * Handles the CSV export for bulk search results.
+   * Uses the `searchId` stored in the global context to fetch the cached results
+   * from the backend via a GET request.
+   */
   const handleExport = async () => {
     if (!state.searchId) return;
 
@@ -124,6 +149,9 @@ const BulkSearch: React.FC = () => {
     }
   };
 
+  /**
+   * Clears all inputs, results, and state for the bulk search page.
+   */
   const handleClear = () => {
     setNames('');
     setUploadedFile(null);
@@ -134,6 +162,7 @@ const BulkSearch: React.FC = () => {
     dispatch({ type: 'CLEAR_RESULTS' });
   };
 
+  // Memoized calculations for display
   const results = state.bulkResults ? Object.values(state.bulkResults) : [];
   const namesWithResults = results.filter(r => r.count > 0).length;
   const totalContributions = results.reduce((sum, r) => sum + r.count, 0);

@@ -1,3 +1,9 @@
+// =============================================================================
+// Individual Search Page
+// =============================================================================
+// This component provides the UI and logic for performing a detailed search
+// for individual contributions, including filtering and pagination.
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Search, Filter, Download } from 'lucide-react';
@@ -18,15 +24,18 @@ interface SearchFormData {
 }
 
 const IndividualSearch: React.FC = () => {
-  const { state, dispatch } = useSearch();
-  const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<Contribution[]>([]);
-  const [total, setTotal] = useState(0);
-  const [limit] = useState(50);
-  const [page, setPage] = useState(1);
-  const [lastQuery, setLastQuery] = useState<string>('');
-  const [fuzzy, setFuzzy] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  // ===========================================================================
+  // State Management
+  // ===========================================================================
+  const { state, dispatch } = useSearch(); // Global context for search state
+  const [isSearching, setIsSearching] = useState(false); // Local loading state for search actions
+  const [results, setResults] = useState<Contribution[]>([]); // Current page of results
+  const [total, setTotal] = useState(0); // Total number of results for the current query
+  const [limit] = useState(50); // Number of results per page
+  const [page, setPage] = useState(1); // Current page number
+  const [lastQuery, setLastQuery] = useState<string>(''); // Stores the last executed query string for pagination/export
+  const [fuzzy, setFuzzy] = useState(false); // Toggles Fuse.js fuzzy search
+  const [hasSearched, setHasSearched] = useState(false); // Tracks if a search has been performed to control UI messages
 
   const {
     register,
@@ -35,6 +44,11 @@ const IndividualSearch: React.FC = () => {
     reset,
   } = useForm<SearchFormData>();
 
+  /**
+   * Fetches a specific page of results for the last executed query.
+   * @param {number} pageNum The page number to fetch.
+   * @param {string} queryString The query string from the last search.
+   */
   const fetchPage = async (pageNum: number, queryString: string) => {
     setIsSearching(true);
     try {
@@ -60,6 +74,11 @@ const IndividualSearch: React.FC = () => {
     }
   };
 
+  /**
+   * Handles the main form submission.
+   * Constructs the query, sends it to the backend, and updates the state with the results.
+   * @param {SearchFormData} data The data from the search form.
+   */
   const onSubmit = async (data: SearchFormData) => {
     setHasSearched(true);
     setIsSearching(true);
@@ -105,18 +124,25 @@ const IndividualSearch: React.FC = () => {
     }
   };
 
+  /**
+   * Triggered when the user clicks a pagination control.
+   * @param {number} newPage The new page number to navigate to.
+   */
   const handlePageChange = (newPage: number) => {
     if (!lastQuery) return;
     fetchPage(newPage, lastQuery);
   };
 
-  // Keep context in sync with local results
+  // Effect to keep the global search context in sync with the local results state.
   useEffect(() => {
     if (results.length > 0) {
       dispatch({ type: 'SET_INDIVIDUAL_RESULTS', payload: results });
     }
   }, [results, dispatch]);
 
+  /**
+   * Clears the form, results, and all related state.
+   */
   const handleClear = () => {
     reset();
     setResults([]);
@@ -127,6 +153,10 @@ const IndividualSearch: React.FC = () => {
     dispatch({ type: 'CLEAR_RESULTS' });
   };
 
+  /**
+   * Handles the CSV export functionality.
+   * It re-uses the `lastQuery` state to request a CSV from the export endpoint.
+   */
   const handleExport = async () => {
     if (!lastQuery || total === 0) return;
     try {

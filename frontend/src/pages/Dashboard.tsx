@@ -1,3 +1,9 @@
+// =============================================================================
+// Dashboard Page
+// =============================================================================
+// This component serves as the main landing page for the application. It displays
+// summary statistics and provides navigation to the core features.
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Users, BarChart3, TrendingUp, DollarSign, Calendar } from 'lucide-react';
