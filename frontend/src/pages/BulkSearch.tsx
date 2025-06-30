@@ -221,7 +221,7 @@ const BulkSearch: React.FC = () => {
             value={names}
             onChange={(e) => setNames(e.target.value)}
             className="w-full h-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            placeholder="Enter names, one per line:&#10;John Smith&#10;Jane Doe&#10;Bob Johnson"
+            placeholder="Enter names, one per line:&#10;Smith Ross&#10;Galas David&#10;Gillespie Susan"
           />
           <p className="text-sm text-gray-500 mt-2">
             Enter one name per line. Maximum 1000 names allowed.
