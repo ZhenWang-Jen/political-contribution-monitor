@@ -2,6 +2,11 @@
 
 A comprehensive web application for monitoring and analyzing political contributions using open-source FEC (Federal Election Commission) data. Built with React frontend and Node.js backend.
 
+![image](https://github.com/user-attachments/assets/5dfde2a6-400e-46d4-adca-f94cb27a4853)
+![image](https://github.com/user-attachments/assets/0c0e1a2c-c1de-495b-a1dc-8ace7d2e6eeb)
+![image](https://github.com/user-attachments/assets/ad64e921-315e-4739-85e5-f7390724262b)
+
+
 ## Features
 
 - **Individual Search**: Search for specific contributors with fuzzy matching
