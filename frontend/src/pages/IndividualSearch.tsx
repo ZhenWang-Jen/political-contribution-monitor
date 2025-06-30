@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import axios from 'axios';
 import { useSearch } from '../contexts/SearchContext';
 import { Contribution } from '../contexts/SearchContext';
@@ -57,7 +57,7 @@ const IndividualSearch: React.FC = () => {
       params.set('limit', limit.toString());
       const response = await axios.get(`/api/search?${params.toString()}`);
       
-      const mappedContributions = response.data.results.contributions.map((c: any) => ({
+      const mappedContributions = response.data.results.contributions.map((c: Contribution) => ({
         ...c,
         id: c.sub_id,
         date: c.transaction_dt,
@@ -67,8 +67,12 @@ const IndividualSearch: React.FC = () => {
       setResults(mappedContributions);
       setTotal(response.data.results.total);
       setPage(pageNum);
-    } catch (error: any) {
-      dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Pagination failed' });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Pagination failed' });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Pagination failed' });
+      }
     } finally {
       setIsSearching(false);
     }
@@ -103,7 +107,7 @@ const IndividualSearch: React.FC = () => {
       setLastQuery(queryString);
       
       const response = await axios.get(`/api/search?${params.toString()}`);
-      const mappedContributions = response.data.results.contributions.map((c: any) => ({
+      const mappedContributions = response.data.results.contributions.map((c: Contribution) => ({
         ...c,
         id: c.sub_id,
         date: c.transaction_dt,
@@ -117,8 +121,12 @@ const IndividualSearch: React.FC = () => {
       if (state.analytics) {
         dispatch({ type: 'SET_ANALYTICS', payload: state.analytics });
       }
-    } catch (error: any) {
-      dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Search failed' });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Search failed' });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Search failed' });
+      }
     } finally {
       setIsSearching(false);
     }

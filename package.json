@@ -18,7 +18,8 @@
     "process-data": "cd backend && npm run process-data"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "eslint": "^8.57.1"
   },
   "keywords": [
     "political",

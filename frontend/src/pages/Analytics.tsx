@@ -31,7 +31,7 @@ const Analytics: React.FC = () => {
         // The backend sends raw contribution objects for the 'topContributions' list.
         // We need to map them to the frontend 'Contribution' model to ensure
         // properties like 'id' and 'amount' (as a number) are correctly set.
-        analyticsData.topContributions = analyticsData.topContributions.map((c: any) => ({
+        analyticsData.topContributions = analyticsData.topContributions.map((c: Contribution) => ({
             ...c,
             id: c.sub_id,
             date: c.transaction_dt,

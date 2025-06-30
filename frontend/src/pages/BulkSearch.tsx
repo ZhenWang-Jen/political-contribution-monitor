@@ -8,14 +8,20 @@ import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Download, Users, FileText } from 'lucide-react';
 import axios from 'axios';
-import { useSearch } from '../contexts/SearchContext';
+import { useSearch, Contribution } from '../contexts/SearchContext';
 import Papa from 'papaparse';
 import ContributionTable from '../components/ContributionTable';
 
 interface PapaParseResult {
-  data: any[][];
+  data: string[][];
   errors: Papa.ParseError[];
   meta: Papa.ParseMeta;
+}
+
+// Define a type for the bulk search result object
+interface BulkResult {
+  count: number;
+  contributions: Contribution[];
 }
 
 const BulkSearch: React.FC = () => {
@@ -54,8 +60,8 @@ const BulkSearch: React.FC = () => {
               complete: (results: PapaParseResult) => {
                 const csvNames = results.data
                   .flat()
-                  .filter((name: any) => name && typeof name === 'string' && name.trim())
-                  .map((name: any) => name.trim());
+                  .filter((name: string) => name && typeof name === 'string' && name.trim())
+                  .map((name: string) => name.trim());
                 setNames(csvNames.join('\n'));
               },
             });
@@ -84,10 +90,10 @@ const BulkSearch: React.FC = () => {
     try {
       const nameList = names
         .split('\n')
-        .map(name => name.trim())
-        .filter(name => name.length > 0);
+        .map((name: string) => name.trim())
+        .filter((name: string) => name.length > 0);
 
-      const filters: any = {};
+      const filters: Record<string, unknown> = {};
       if (fuzzy) filters.fuzzy = true;
       if (city) filters.city = city;
       if (stateFilter) filters.state = stateFilter;
@@ -100,8 +106,8 @@ const BulkSearch: React.FC = () => {
       const bulkResults = response.data.results;
       // Map contributions to frontend model
       for (const name in bulkResults) {
-        if (bulkResults.hasOwnProperty(name)) {
-          bulkResults[name].contributions = bulkResults[name].contributions.map((c: any) => ({
+        if (Object.prototype.hasOwnProperty.call(bulkResults, name)) {
+          bulkResults[name].contributions = bulkResults[name].contributions.map((c: Contribution) => ({
             ...c,
             id: c.sub_id,
             date: c.transaction_dt,
@@ -117,8 +123,12 @@ const BulkSearch: React.FC = () => {
           searchId: response.data.searchId,
         },
       });
-    } catch (error: any) {
-      dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Bulk search failed' });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Bulk search failed' });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Bulk search failed' });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -163,10 +173,10 @@ const BulkSearch: React.FC = () => {
   };
 
   // Memoized calculations for display
-  const results = state.bulkResults ? Object.values(state.bulkResults) : [];
-  const namesWithResults = results.filter(r => r.count > 0).length;
-  const totalContributions = results.reduce((sum, r) => sum + r.count, 0);
-  const allContributions = results.flatMap(result => result.contributions);
+  const results: BulkResult[] = state.bulkResults ? Object.values(state.bulkResults) : [];
+  const namesWithResults = results.filter((r: BulkResult) => r.count > 0).length;
+  const totalContributions = results.reduce((sum: number, r: BulkResult) => sum + r.count, 0);
+  const allContributions = results.flatMap((result: BulkResult) => result.contributions);
 
   return (
     <div className="space-y-8">
